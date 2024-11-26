@@ -1,13 +1,16 @@
 import './App.css';
-import { Header } from './components/Header';
+
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
 import { JsonFormsDemo } from './components/JsonFormsDemo';
 
 const App = () => {
   return (
-    <>
-      <Header />
-      <JsonFormsDemo />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route index element={<JsonFormsDemo />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

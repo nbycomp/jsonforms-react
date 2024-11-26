@@ -1,16 +1,17 @@
-import { FC, useMemo, useState } from 'react';
-import { JsonForms } from '@jsonforms/react';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
+import { useMemo, useState } from 'react';
+
+import { UISchemaElement } from '@jsonforms/core';
 import {
   materialCells,
   materialRenderers,
 } from '@jsonforms/material-renderers';
-import RatingControl from './RatingControl';
-import ratingControlTester from '../ratingControlTester';
-import schema from '../schema.json';
-import uischema from '../uischema.json';
+import { JsonForms } from '@jsonforms/react';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+
+import { useQueryState } from '../queryState';
+import { SchemaInput } from './SchemaInput';
 
 const classes = {
   container: {
@@ -38,23 +39,32 @@ const classes = {
   },
 };
 
-const initialData = {
-  name: 'Send email to Adrian',
-  description: 'Confirm if you have passed the subject\nHereby ...',
-  done: true,
-  recurrence: 'Daily',
-  rating: 3,
-};
+const initialData = {};
 
-const renderers = [
-  ...materialRenderers,
-  //register custom renderers
-  { tester: ratingControlTester, renderer: RatingControl },
-];
+const renderers = [...materialRenderers];
 
-export const JsonFormsDemo: FC = () => {
+export function JsonFormsDemo() {
   const [data, setData] = useState<object>(initialData);
   const stringifiedData = useMemo(() => JSON.stringify(data, null, 2), [data]);
+
+  const [schema, setSchema] = useQueryState('schema');
+  const [uiSchema, setUiSchema] = useQueryState('uiSchema');
+
+  let schemaObject: object;
+  try {
+    schemaObject = JSON.parse(schema || '');
+  } catch {
+    schemaObject = {};
+  }
+
+  let uiSchemaObject: UISchemaElement;
+  try {
+    uiSchemaObject = JSON.parse(uiSchema || '');
+  } catch {
+    uiSchemaObject = {
+      type: '',
+    };
+  }
 
   const clearData = () => {
     setData({});
@@ -65,6 +75,16 @@ export const JsonFormsDemo: FC = () => {
       justifyContent={'center'}
       spacing={1}
       style={classes.container}>
+      <SchemaInput
+        title="values.schema.json"
+        value={schema}
+        onChange={setSchema}
+      />
+      <SchemaInput
+        title="uiSchema.json"
+        value={uiSchema}
+        onChange={setUiSchema}
+      />
       <Grid item sm={6}>
         <Typography variant={'h4'}>Bound data</Typography>
         <div style={classes.dataContent}>
@@ -83,8 +103,8 @@ export const JsonFormsDemo: FC = () => {
         <Typography variant={'h4'}>Rendered form</Typography>
         <div style={classes.demoform}>
           <JsonForms
-            schema={schema}
-            uischema={uischema}
+            schema={schemaObject}
+            uischema={uiSchemaObject}
             data={data}
             renderers={renderers}
             cells={materialCells}
@@ -94,4 +114,4 @@ export const JsonFormsDemo: FC = () => {
       </Grid>
     </Grid>
   );
-};
+}
