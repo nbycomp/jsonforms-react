@@ -1,10 +1,14 @@
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from 'lz-string';
 import qs from 'qs';
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export const useQueryState = (
   query: string,
-): [string | undefined, (s: string | undefined) => void] => {
+): [string, (s: string | undefined) => void] => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,7 +21,7 @@ export const useQueryState = (
       if (!value) return;
 
       const queryString = qs.stringify(
-        { ...existingQueries, [query]: value },
+        { ...existingQueries, [query]: compressToEncodedURIComponent(value) },
         { skipNulls: true },
       );
 
@@ -26,5 +30,9 @@ export const useQueryState = (
     [existingQueries, location.pathname, navigate, query],
   );
 
-  return [existingQueries[query], setQuery];
+  const value = existingQueries[query]
+    ? decompressFromEncodedURIComponent(existingQueries[query])
+    : '';
+
+  return [value, setQuery];
 };
