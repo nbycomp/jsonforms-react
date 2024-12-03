@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 
-import { UISchemaElement } from '@jsonforms/core';
 import {
   materialCells,
   materialRenderers,
@@ -41,8 +40,6 @@ const classes = {
 
 const initialData = {};
 
-const renderers = [...materialRenderers];
-
 export function JsonFormsDemo() {
   const [data, setData] = useState<object>(initialData);
   const stringifiedData = useMemo(() => JSON.stringify(data, null, 2), [data]);
@@ -50,21 +47,21 @@ export function JsonFormsDemo() {
   const [schema, setSchema] = useQueryState('schema');
   const [uiSchema, setUiSchema] = useQueryState('uiSchema');
 
-  let schemaObject: object;
-  try {
-    schemaObject = JSON.parse(schema || '');
-  } catch {
-    schemaObject = {};
-  }
+  const schemaObject = useMemo(() => {
+    try {
+      return JSON.parse(schema);
+    } catch {
+      return {};
+    }
+  }, [schema]);
 
-  let uiSchemaObject: UISchemaElement;
-  try {
-    uiSchemaObject = JSON.parse(uiSchema || '');
-  } catch {
-    uiSchemaObject = {
-      type: '',
-    };
-  }
+  const uiSchemaObject = useMemo(() => {
+    try {
+      return JSON.parse(uiSchema);
+    } catch {
+      return {};
+    }
+  }, [uiSchema]);
 
   const clearData = () => {
     setData({});
@@ -106,7 +103,7 @@ export function JsonFormsDemo() {
             schema={schemaObject}
             uischema={uiSchemaObject}
             data={data}
-            renderers={renderers}
+            renderers={materialRenderers}
             cells={materialCells}
             onChange={({ data }) => setData(data)}
           />
